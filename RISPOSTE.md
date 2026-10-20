@@ -28,7 +28,7 @@ Nelle versioni recenti `HttpClient` funziona anche senza, ma quella riga resta i
 
 Fanno la stessa cosa: chiedono ad Angular l'istanza di `HttpClient`. Con il costruttore Angular la passa come parametro e `public` la trasforma in una proprietà. Con `inject()` la chiedo direttamente nella dichiarazione della proprietà, senza costruttore.
 
-`inject()` è più corto e con `private readonly` nessuno da fuori può usare o sostituire `http`. Dentro una classe `@Service()` funziona solo `inject()`: l'iniezione dal costruttore non è supportata. Per questo tutti i servizi del progetto (`PostService`, `CatService`, `NasaService`, `PokemonService`) usano `inject(HttpClient)`.
+`inject()` è più corto e con `private readonly` nessuno da fuori può usare o sostituire `http`. Dentro una classe `@Service()` funziona solo `inject()`. Ho provato a scrivere un servizio con `constructor(public http: HttpClient)` e la compilazione si ferma con `NG2028: @Service class cannot use constructor dependency injection. Use the inject function instead.` Per questo tutti i servizi del progetto (`PostService`, `CatService`, `NasaService`, `PokemonService`) usano `inject(HttpClient)`.
 
 ## 3. Che cos'è un Observable? Quando parte la richiesta scritta in getPosts()?
 
