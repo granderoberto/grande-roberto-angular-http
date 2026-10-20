@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { Apod } from '../modelli/apod';
 import { NasaService } from '../services/nasa-service';
 
@@ -17,21 +18,36 @@ export class Nasa implements OnInit {
   readonly errore = signal<string | null>(null);
 
   ngOnInit(): void {
+    this.carica(this.nasaService.getApod());
+  }
+
+  mostra(data: string): void {
+    if (data === '') {
+      return;
+    }
+    this.carica(this.nasaService.getApodDel(data));
+  }
+
+  private carica(richiesta: Observable<Apod>): void {
     this.loading.set(true);
-    this.nasaService.getApod().subscribe({
+    this.errore.set(null);
+    richiesta.subscribe({
       next: (dati) => {
         this.apod.set(dati);
         this.loading.set(false);
       },
       error: (err: HttpErrorResponse) => {
-        this.errore.set(this.messaggio(err.status));
+        this.apod.set(null);
+        this.errore.set(this.messaggio(err));
         this.loading.set(false);
       },
     });
   }
 
-  private messaggio(status: number): string {
-    switch (status) {
+  private messaggio(err: HttpErrorResponse): string {
+    switch (err.status) {
+      case 400:
+        return `Data non valida: ${err.error?.msg ?? 'il server ha rifiutato la richiesta.'}`;
       case 403:
         return 'Chiave API mancante o non valida: controlla i file in src/environments.';
       case 429:
@@ -39,7 +55,7 @@ export class Nasa implements OnInit {
       case 0:
         return 'Il server non è raggiungibile: controlla la connessione.';
       default:
-        return `Errore ${status} dal server della NASA.`;
+        return `Errore ${err.status} dal server della NASA.`;
     }
   }
 }
